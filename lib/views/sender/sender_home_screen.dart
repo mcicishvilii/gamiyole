@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../viewmodels/shipment_view_model.dart';
+
 import '../../viewmodels/auth/auth_view_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../viewmodels/shipment_view_model.dart';
+import 'sender_post_create_screen.dart';
 
 class SenderHomeScreen extends StatelessWidget {
+  const SenderHomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<ShipmentViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Shipments"),
+        title: const Text('Traveler Posts'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add_location_alt),
+            tooltip: 'Add where you are going',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SenderPostCreateScreen(),
+                ),
+              );
+            },
+          ),
           PopupMenuButton(
-            itemBuilder: (context) => [
+            itemBuilder: (context) => const [
               PopupMenuItem(
-                child: Text("Logout"),
-                value: "logout",
+                value: 'logout',
+                child: Text('Logout'),
               ),
             ],
             onSelected: (value) {
-              if (value == "logout") {
+              if (value == 'logout') {
                 Provider.of<AuthViewModel>(context, listen: false).logout();
                 Navigator.popUntil(context, (route) => route.isFirst);
               }
@@ -27,47 +44,22 @@ class SenderHomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.card_travel,
-                size: 80,
-                color: Colors.blue,
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Sender Dashboard",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Post your shipments and connect with trustworthy travelers.",
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 40),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Provider.of<ShipmentViewModel>(context, listen: false)
-                      .createTestShipment();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Shipment created!")),
-                  );
-                },
-                icon: Icon(Icons.add),
-                label: Text("Create New Shipment"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: vm.travelerPosts.isEmpty
+          ? const Center(child: Text('No traveler posts yet'))
+          : ListView.builder(
+              itemCount: vm.travelerPosts.length,
+              itemBuilder: (context, index) {
+                final item = vm.travelerPosts[index];
+                return Card(
+                  margin: const EdgeInsets.all(10),
+                  child: ListTile(
+                    leading: const Icon(Icons.person_pin_circle),
+                    title: Text('${item.origin} ➜ ${item.destination}'),
+                    subtitle: const Text('Traveler wants to go this route'),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
