@@ -22,7 +22,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => ShipmentViewModel()..fetchShipments()),
+        ChangeNotifierProvider(create: (_) => ShipmentViewModel()..fetchShipments()..fetchTravelPosts()),
       ],
       child: const MyApp(),
     ),
@@ -43,9 +43,9 @@ class MyApp extends StatelessWidget {
           }
 
           if (authVM.appUser!.role == "sender") {
-            return SenderHomeScreen();
+            return const SenderHomeScreen();
           } else {
-            return TravelerHomeScreen();
+            return const TravelerHomeScreen();
           }
         },
       ),
