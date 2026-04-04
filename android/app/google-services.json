@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "95990393761",
+    "project_id": "gayoleba",
+    "storage_bucket": "gayoleba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95990393761:android:b274b407a0930d52bcf9e0",
+        "android_client_info": {
+          "package_name": "com.example.gamiyole"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfXQmZgFg6SfOj2DuxTMVNrlG4qk_XLGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
