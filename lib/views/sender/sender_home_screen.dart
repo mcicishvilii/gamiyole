@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../viewmodels/auth/auth_view_model.dart';
 import '../../viewmodels/shipment_view_model.dart';
+import '../../widgets/user_menu_button.dart';
 import 'sender_post_create_screen.dart';
 
 class SenderHomeScreen extends StatelessWidget {
@@ -28,20 +28,7 @@ class SenderHomeScreen extends StatelessWidget {
               );
             },
           ),
-          PopupMenuButton(
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'logout',
-                child: Text('Logout'),
-              ),
-            ],
-            onSelected: (value) {
-              if (value == 'logout') {
-                Provider.of<AuthViewModel>(context, listen: false).logout();
-                Navigator.popUntil(context, (route) => route.isFirst);
-              }
-            },
-          ),
+          const UserMenuButton(),
         ],
       ),
       body: vm.travelerPosts.isEmpty
