@@ -18,27 +18,6 @@ class ShipmentViewModel extends ChangeNotifier {
   List<TravelPost> get senderPosts => _senderPosts;
   List<TravelPost> get travelerPosts => _travelerPosts;
 
-  void fetchShipments() {
-    _shipmentsSub?.cancel();
-
-    final query = _db.collection('shipments').where('status', isEqualTo: 'open');
-    _shipmentsSub = query.snapshots(includeMetadataChanges: true).listen(
-      (snapshot) {
-        _shipments = snapshot.docs
-            .map((doc) => Shipment.fromMap(doc.data(), doc.id))
-            .toList();
-        notifyListeners();
-
-        if (snapshot.metadata.isFromCache) {
-          _refreshShipmentsFromServer(query);
-        }
-      },
-      onError: (error) {
-        debugPrint('SHIPMENTS_QUERY_ERROR: $error');
-      },
-    );
-  }
-
   void fetchTravelPosts() {
     _senderPostsSub?.cancel();
     _travelerPostsSub?.cancel();
@@ -176,22 +155,5 @@ class ShipmentViewModel extends ChangeNotifier {
     } catch (e) {
       print('Error adding shipment: $e');
     }
-  }
-
-  Future<void> placeBid(String shipmentId, String travelerId, double price) async {
-    await _db.collection('shipments').doc(shipmentId).collection('offers').add({
-      'travelerId': travelerId,
-      'price': price,
-      'status': 'sent',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  @override
-  void dispose() {
-    _shipmentsSub?.cancel();
-    _senderPostsSub?.cancel();
-    _travelerPostsSub?.cancel();
-    super.dispose();
   }
 }

@@ -7,10 +7,14 @@ import 'sender_post_create_screen.dart';
 
 class SenderHomeScreen extends StatelessWidget {
   const SenderHomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<ShipmentViewModel>(context);
+
+    print('[SENDER_SCREEN] travelerPosts=${vm.travelerPosts.length}');
+    for (final p in vm.travelerPosts) {
+      print('[SENDER_SCREEN_ITEM] id=${p.id} ${p.origin} -> ${p.destination}');
+    }
 
     return Scaffold(
       appBar: AppBar(

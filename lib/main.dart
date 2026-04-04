@@ -22,7 +22,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => ShipmentViewModel()..fetchShipments()..fetchTravelPosts()),
+        ChangeNotifierProvider(create: (_) => ShipmentViewModel()..fetchTravelPosts()),
       ],
       child: const MyApp(),
     ),
