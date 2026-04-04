@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/shipment.dart';
@@ -8,37 +10,105 @@ class ShipmentViewModel extends ChangeNotifier {
   List<Shipment> _shipments = [];
   List<TravelPost> _senderPosts = [];
   List<TravelPost> _travelerPosts = [];
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _shipmentsSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _senderPostsSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _travelerPostsSub;
 
   List<Shipment> get shipments => _shipments;
   List<TravelPost> get senderPosts => _senderPosts;
   List<TravelPost> get travelerPosts => _travelerPosts;
 
   void fetchTravelPosts() {
-    _db
+    _senderPostsSub?.cancel();
+    _travelerPostsSub?.cancel();
+
+    final senderQuery = _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
         .where('authorRole', isEqualTo: 'sender')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .listen((snapshot) {
-          _senderPosts = snapshot.docs
-              .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
-              .toList();
-          notifyListeners();
-        });
+        .orderBy('createdAt', descending: true);
 
-    _db
+    _senderPostsSub = senderQuery.snapshots(includeMetadataChanges: true).listen(
+      (snapshot) {
+        _senderPosts = snapshot.docs
+            .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+            .toList();
+        notifyListeners();
+
+        if (snapshot.metadata.isFromCache) {
+          _refreshSenderPostsFromServer(senderQuery);
+        }
+      },
+      onError: (error) {
+        debugPrint('SENDER_QUERY_ERROR: $error');
+      },
+    );
+
+    final travelerQuery = _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
         .where('authorRole', isEqualTo: 'traveler')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .listen((snapshot) {
-          _travelerPosts = snapshot.docs
-              .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
-              .toList();
-          notifyListeners();
-        });
+        .orderBy('createdAt', descending: true);
+
+    _travelerPostsSub = travelerQuery
+        .snapshots(includeMetadataChanges: true)
+        .listen(
+      (snapshot) {
+        _travelerPosts = snapshot.docs
+            .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+            .toList();
+        notifyListeners();
+
+        if (snapshot.metadata.isFromCache) {
+          _refreshTravelerPostsFromServer(travelerQuery);
+        }
+      },
+      onError: (error) {
+        debugPrint('TRAVELER_QUERY_ERROR: $error');
+      },
+    );
+  }
+
+  Future<void> _refreshShipmentsFromServer(
+    Query<Map<String, dynamic>> query,
+  ) async {
+    try {
+      final serverSnapshot = await query.get(const GetOptions(source: Source.server));
+      _shipments = serverSnapshot.docs
+          .map((doc) => Shipment.fromMap(doc.data(), doc.id))
+          .toList();
+      notifyListeners();
+    } catch (error) {
+      debugPrint('SHIPMENTS_SERVER_REFRESH_ERROR: $error');
+    }
+  }
+
+  Future<void> _refreshSenderPostsFromServer(
+    Query<Map<String, dynamic>> query,
+  ) async {
+    try {
+      final serverSnapshot = await query.get(const GetOptions(source: Source.server));
+      _senderPosts = serverSnapshot.docs
+          .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+          .toList();
+      notifyListeners();
+    } catch (error) {
+      debugPrint('SENDER_SERVER_REFRESH_ERROR: $error');
+    }
+  }
+
+  Future<void> _refreshTravelerPostsFromServer(
+    Query<Map<String, dynamic>> query,
+  ) async {
+    try {
+      final serverSnapshot = await query.get(const GetOptions(source: Source.server));
+      _travelerPosts = serverSnapshot.docs
+          .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+          .toList();
+      notifyListeners();
+    } catch (error) {
+      debugPrint('TRAVELER_SERVER_REFRESH_ERROR: $error');
+    }
   }
 
   Future<void> createTravelerPost({
