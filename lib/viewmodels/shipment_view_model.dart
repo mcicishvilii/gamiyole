@@ -1,55 +1,92 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../models/shipment.dart';
 import '../models/travel_post.dart';
 
 class ShipmentViewModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  List<Shipment> _shipments = [];
+
   List<TravelPost> _senderPosts = [];
   List<TravelPost> _travelerPosts = [];
 
-  List<Shipment> get shipments => _shipments;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _senderSubscription;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _travelerSubscription;
+
   List<TravelPost> get senderPosts => _senderPosts;
   List<TravelPost> get travelerPosts => _travelerPosts;
 
-  void fetchShipments() {
-    _db
-        .collection('shipments')
-        .where('status', isEqualTo: 'open')
-        .snapshots()
-        .listen((snapshot) {
-          _shipments = snapshot.docs
-              .map((doc) => Shipment.fromMap(doc.data(), doc.id))
-              .toList();
-          notifyListeners();
-        });
-  }
-
   void fetchTravelPosts() {
-    _db
+    _senderSubscription?.cancel();
+    _travelerSubscription?.cancel();
+
+    _senderSubscription = _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
         .where('authorRole', isEqualTo: 'sender')
         .orderBy('createdAt', descending: true)
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .listen((snapshot) {
+          print(
+            '[SENDER_QUERY] '
+            'count=${snapshot.docs.length} '
+            'fromCache=${snapshot.metadata.isFromCache} '
+            'pendingWrites=${snapshot.metadata.hasPendingWrites}',
+          );
+
+          for (final d in snapshot.docs) {
+            print(
+              '[SENDER_DOC] '
+              'docId=${d.id} '
+              'origin=${d.data()['origin']} '
+              'dest=${d.data()['destination']}',
+            );
+          }
+
           _senderPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
               .toList();
+
+          print(
+            '[STATE] senderPosts=${_senderPosts.length}, '
+            'travelerPosts=${_travelerPosts.length}',
+          );
+
           notifyListeners();
         });
 
-    _db
+    _travelerSubscription = _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
         .where('authorRole', isEqualTo: 'traveler')
         .orderBy('createdAt', descending: true)
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .listen((snapshot) {
+          print(
+            '[TRAVELER_QUERY] '
+            'count=${snapshot.docs.length} '
+            'fromCache=${snapshot.metadata.isFromCache} '
+            'pendingWrites=${snapshot.metadata.hasPendingWrites}',
+          );
+
+          for (final d in snapshot.docs) {
+            print(
+              '[TRAVELER_DOC] '
+              'docId=${d.id} '
+              'origin=${d.data()['origin']} '
+              'dest=${d.data()['destination']}',
+            );
+          }
+
           _travelerPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
               .toList();
+
+          print(
+            '[STATE] senderPosts=${_senderPosts.length}, '
+            'travelerPosts=${_travelerPosts.length}',
+          );
+
           notifyListeners();
         });
   }
@@ -84,28 +121,10 @@ class ShipmentViewModel extends ChangeNotifier {
     });
   }
 
-  Future<void> createTestShipment() async {
-    try {
-      await _db.collection('shipments').add({
-        'senderId': 'test_user_123',
-        'origin': 'Tbilisi',
-        'destination': 'Batumi',
-        'budget': 25.0,
-        'status': 'open',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      print('Shipment added successfully!');
-    } catch (e) {
-      print('Error adding shipment: $e');
-    }
-  }
-
-  Future<void> placeBid(String shipmentId, String travelerId, double price) async {
-    await _db.collection('shipments').doc(shipmentId).collection('offers').add({
-      'travelerId': travelerId,
-      'price': price,
-      'status': 'sent',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+  @override
+  void dispose() {
+    _senderSubscription?.cancel();
+    _travelerSubscription?.cancel();
+    super.dispose();
   }
 }
