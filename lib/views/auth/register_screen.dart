@@ -3,15 +3,17 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  RegisterScreenState createState() => RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   String? _selectedRole;
   bool _isLoading = false;
   String? _errorMessage;
@@ -52,30 +54,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      await Provider.of<AuthViewModel>(context, listen: false).signUp(
+      final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      await authVM.signUp(
         _emailController.text.trim(),
         _passwordController.text,
         _selectedRole!,
       );
-      Navigator.popUntil(context, (route) => route.isFirst);
+      if (mounted) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Register"),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text("Register"), elevation: 0),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24),
         child: Column(
@@ -181,7 +187,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     )
                   : Text(
                       "Register",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
             ),
           ],
@@ -216,11 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 40,
-              color: isSelected ? Colors.blue : Colors.grey,
-            ),
+            Icon(icon, size: 40, color: isSelected ? Colors.blue : Colors.grey),
             SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -228,27 +233,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
                 ],
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Colors.blue,
-                size: 28,
-              ),
+              Icon(Icons.check_circle, color: Colors.blue, size: 28),
           ],
         ),
       ),

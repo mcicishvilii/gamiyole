@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/auth/auth_view_model.dart';
@@ -29,7 +30,7 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     });
   }
 
-  Future<bool> _confirmExit() async {
+  Future<void> _showExitDialog() async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -50,7 +51,16 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
       },
     );
 
-    return result == true;
+    if (result == true && mounted) {
+      SystemNavigator.pop();
+    }
+  }
+
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic result) async {
+    if (didPop) {
+      return;
+    }
+    await _showExitDialog();
   }
 
   Widget _buildSearchTab(ShipmentViewModel vm) {
@@ -188,8 +198,9 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     final vm = Provider.of<ShipmentViewModel>(context);
     final authVm = Provider.of<AuthViewModel>(context);
 
-    return WillPopScope(
-      onWillPop: _confirmExit,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopInvokedWithResult,
       child: Scaffold(
         appBar: AppBar(title: Text(_titles[_selectedIndex])),
         body: IndexedStack(

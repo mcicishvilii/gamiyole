@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/auth/auth_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -27,29 +29,33 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Provider.of<AuthViewModel>(context, listen: false).login(
+      final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      await authVM.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
-      Navigator.popUntil(context, (route) => route.isFirst);
+      if (mounted) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Login"),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text("Login"), elevation: 0),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24),
         child: Column(
@@ -121,7 +127,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     )
                   : Text(
                       "Login",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
             ),
           ],
