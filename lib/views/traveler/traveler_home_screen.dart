@@ -12,10 +12,6 @@ class TravelerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = Provider.of<ShipmentViewModel>(context);
 
-    for (var post in vm.travelerPosts) {
-      print('Origin: ${post.origin}, Destination: ${post.destination}');
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sender Posts'),

@@ -18,14 +18,9 @@ class ShipmentViewModel extends ChangeNotifier {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
-          for (var doc in snapshot.docs) {
-            print('viumodeli Sender post: ${doc.data()}');
-          }
-
           _senderPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
               .toList();
-
           notifyListeners();
         });
 
@@ -36,14 +31,9 @@ class ShipmentViewModel extends ChangeNotifier {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
-          for (var doc in snapshot.docs) {
-            print('viumodeli Traveler post: ${doc.data()}');
-          }
-
           _travelerPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
               .toList();
-
           notifyListeners();
         });
   }
@@ -77,4 +67,5 @@ class ShipmentViewModel extends ChangeNotifier {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
 }
