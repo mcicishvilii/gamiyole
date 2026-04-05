@@ -129,49 +129,54 @@ class _SenderHomeScreenState extends State<SenderHomeScreen> {
     return Center(
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 24),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: avatarColor,
-                child: Text(
-                  firstLetter,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: avatarColor,
+                  child: Text(
+                    firstLetter,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                email,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(height: 20),
+                Text(
+                  email,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                role,
-                style: const TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
-                  onPressed: () {
-                    authVm.logout();
-                  },
+                const SizedBox(height: 8),
+                Text(
+                  role,
+                  style: const TextStyle(color: Colors.grey, fontSize: 16),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Logout'),
+                    onPressed: () {
+                      authVm.logout();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
