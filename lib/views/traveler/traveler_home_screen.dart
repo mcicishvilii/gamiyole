@@ -29,6 +29,30 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     });
   }
 
+  Future<bool> _confirmExit() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Leave App?'),
+          content: const Text('Are you sure you want to leave the app?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Leave'),
+            ),
+          ],
+        );
+      },
+    );
+
+    return result == true;
+  }
+
   Widget _buildSearchTab(ShipmentViewModel vm) {
     if (vm.senderPosts.isEmpty) {
       return const Center(child: Text('No sender posts yet'));
@@ -159,32 +183,38 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     final vm = Provider.of<ShipmentViewModel>(context);
     final authVm = Provider.of<AuthViewModel>(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex])),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _buildSearchTab(vm),
-          _buildPublishTab(context),
-          _buildUnderConstruction('Your Rides'),
-          _buildUnderConstruction('Inbox'),
-          _buildProfileTab(authVm),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.publish), label: 'Publish'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.directions_car),
-            label: 'Your Rides',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.mail), label: 'Inbox'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+    return WillPopScope(
+      onWillPop: _confirmExit,
+      child: Scaffold(
+        appBar: AppBar(title: Text(_titles[_selectedIndex])),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildSearchTab(vm),
+            _buildPublishTab(context),
+            _buildUnderConstruction('Your Rides'),
+            _buildUnderConstruction('Inbox'),
+            _buildProfileTab(authVm),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.publish),
+              label: 'Publish',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.directions_car),
+              label: 'Your Rides',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.mail), label: 'Inbox'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ],
+        ),
       ),
     );
   }
