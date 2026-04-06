@@ -63,6 +63,12 @@ class _SenderHomeScreenState extends State<SenderHomeScreen> {
     await _showExitDialog();
   }
 
+  String _formatDate(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
+  }
+
   Widget _buildSearchTab(ShipmentViewModel vm) {
     if (vm.travelerPosts.isEmpty) {
       return const Center(child: Text('No traveler posts yet'));
@@ -72,12 +78,24 @@ class _SenderHomeScreenState extends State<SenderHomeScreen> {
       itemCount: vm.travelerPosts.length,
       itemBuilder: (context, index) {
         final item = vm.travelerPosts[index];
+        final returnDateText = item.returnDate != null
+            ? 'Return: ${_formatDate(item.returnDate!)}'
+            : 'No return date';
+
         return Card(
           margin: const EdgeInsets.all(10),
           child: ListTile(
             leading: const Icon(Icons.person_pin_circle),
             title: Text('${item.origin} ➜ ${item.destination}'),
-            subtitle: const Text('Traveler wants to go this route'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Budget: \\${item.priceOffer}'),
+                Text('Departure: ${_formatDate(item.departureDate)}'),
+                Text(returnDateText),
+              ],
+            ),
+            isThreeLine: true,
           ),
         );
       },
@@ -125,12 +143,26 @@ class _SenderHomeScreenState extends State<SenderHomeScreen> {
       itemCount: vm.myPosts.length,
       itemBuilder: (context, index) {
         final item = vm.myPosts[index];
+        final deliveryDateText = item.returnDate != null
+            ? 'Delivery: ${_formatDate(item.returnDate!)}'
+            : 'No specific delivery date';
+
         return Card(
           margin: const EdgeInsets.all(10),
           child: ListTile(
             leading: const Icon(Icons.local_shipping),
             title: Text('${item.origin} ➜ ${item.destination}'),
-            subtitle: Text('Status: ${item.status}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Status: ${item.status}'),
+                Text('Budget: \\\\${item.priceOffer}'),
+                Text('Pickup: ${_formatDate(item.departureDate)}'),
+                Text(deliveryDateText),
+                Text('Seats needed: ${item.seatsNeeded}'),
+              ],
+            ),
+            isThreeLine: true,
           ),
         );
       },

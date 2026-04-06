@@ -59,12 +59,18 @@ class ShipmentViewModel extends ChangeNotifier {
     required String travelerId,
     required String origin,
     required String destination,
+    required int priceOffer,
+    required DateTime departureDate,
+    DateTime? returnDate,
   }) async {
     await _db.collection('travel_posts').add({
       'authorId': travelerId,
       'authorRole': 'traveler',
       'origin': origin,
       'destination': destination,
+      'priceOffer': priceOffer,
+      'departureDate': Timestamp.fromDate(departureDate),
+      'returnDate': returnDate != null ? Timestamp.fromDate(returnDate) : null,
       'status': 'open',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -74,12 +80,20 @@ class ShipmentViewModel extends ChangeNotifier {
     required String senderId,
     required String origin,
     required String destination,
+    required int budget,
+    required DateTime pickupDate,
+    DateTime? deliveryDate,
+    required int seatsNeeded,
   }) async {
     await _db.collection('travel_posts').add({
       'authorId': senderId,
       'authorRole': 'sender',
       'origin': origin,
       'destination': destination,
+      'priceOffer': budget,
+      'departureDate': Timestamp.fromDate(pickupDate),
+      'returnDate': deliveryDate != null ? Timestamp.fromDate(deliveryDate) : null,
+      'seatsNeeded': seatsNeeded,
       'status': 'open',
       'createdAt': FieldValue.serverTimestamp(),
     });
