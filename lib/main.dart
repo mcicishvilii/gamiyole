@@ -8,14 +8,17 @@ import 'views/auth/auth_screen.dart';
 import 'views/sender/sender_home_screen.dart';
 import 'views/traveler/traveler_home_screen.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-    options: (Platform.isLinux || Platform.isWindows) 
+    options: kIsWeb 
         ? DefaultFirebaseOptions.web 
-        : DefaultFirebaseOptions.currentPlatform,
+        : (Platform.isLinux || Platform.isWindows)
+            ? DefaultFirebaseOptions.web 
+            : DefaultFirebaseOptions.currentPlatform,
   );
 
   runApp(
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
       home: Consumer<AuthViewModel>(
         builder: (context, authVM, _) {
           if (authVM.appUser == null) {
-            return AuthScreen();
+            return const AuthScreen();
           }
 
           if (authVM.appUser!.role == "sender") {
