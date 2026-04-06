@@ -125,6 +125,28 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     );
   }
 
+  Widget _buildYourRidesTab(ShipmentViewModel vm) {
+    if (vm.myPosts.isEmpty) {
+      return const Center(
+        child: Text('No posts yet. Create one to get started!'),
+      );
+    }
+    return ListView.builder(
+      itemCount: vm.myPosts.length,
+      itemBuilder: (context, index) {
+        final item = vm.myPosts[index];
+        return Card(
+          margin: const EdgeInsets.all(10),
+          child: ListTile(
+            leading: const Icon(Icons.directions_walk),
+            title: Text('${item.origin} ➜ ${item.destination}'),
+            subtitle: Text('Status: ${item.status}'),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildProfileTab(AuthViewModel authVm) {
     final user = authVm.appUser;
     final email = user?.email ?? authVm.firebaseUser?.email ?? 'Unknown user';
@@ -198,6 +220,13 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
     final vm = Provider.of<ShipmentViewModel>(context);
     final authVm = Provider.of<AuthViewModel>(context);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (authVm.firebaseUser?.uid != null) {
+        vm.fetchTravelPosts(currentUserId: authVm.firebaseUser!.uid);
+        vm.fetchMyPosts(authVm.firebaseUser!.uid);
+      }
+    });
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: _onPopInvokedWithResult,
@@ -208,7 +237,7 @@ class _TravelerHomeScreenState extends State<TravelerHomeScreen> {
           children: [
             _buildSearchTab(vm),
             _buildPublishTab(context),
-            _buildUnderConstruction('Your Rides'),
+            _buildYourRidesTab(vm),
             _buildUnderConstruction('Inbox'),
             _buildProfileTab(authVm),
           ],

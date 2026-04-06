@@ -6,11 +6,13 @@ class ShipmentViewModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   List<TravelPost> _senderPosts = [];
   List<TravelPost> _travelerPosts = [];
-
+  List<TravelPost> _myPosts = [];
+  
   List<TravelPost> get senderPosts => _senderPosts;
   List<TravelPost> get travelerPosts => _travelerPosts;
+  List<TravelPost> get myPosts => _myPosts;
 
-  void fetchTravelPosts() {
+  void fetchTravelPosts({String? currentUserId}) {
     _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
@@ -20,10 +22,10 @@ class ShipmentViewModel extends ChangeNotifier {
         .listen((snapshot) {
           _senderPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+              .where((post) => post.authorId != currentUserId)
               .toList();
           notifyListeners();
         });
-
     _db
         .collection('travel_posts')
         .where('status', isEqualTo: 'open')
@@ -32,6 +34,21 @@ class ShipmentViewModel extends ChangeNotifier {
         .snapshots()
         .listen((snapshot) {
           _travelerPosts = snapshot.docs
+              .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
+              .where((post) => post.authorId != currentUserId)
+              .toList();
+          notifyListeners();
+        });
+  }
+
+  void fetchMyPosts(String userId) {
+    _db
+        .collection('travel_posts')
+        .where('authorId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+          _myPosts = snapshot.docs
               .map((doc) => TravelPost.fromMap(doc.data(), doc.id))
               .toList();
           notifyListeners();
@@ -67,5 +84,4 @@ class ShipmentViewModel extends ChangeNotifier {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
-
 }
